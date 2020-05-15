@@ -1,12 +1,12 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 
 import './App.css';
 import Header from './components/header/header.component';
 import Homepage from './pages/homepage/homepage.component';
 import ShopPage from './pages/shop/shop.component';
 import SignInndSignUpPage from './pages/sign-in-and-up/sign-in-and-up,component';
-import { auth } from './firebase/firebase.utils';
+import { auth , createUserProfileDocument } from './firebase/firebase.utils';
 
 const HatsPage =()=>(
   <div>
@@ -25,8 +25,24 @@ constructor(){
 unsubscribeFromAuth = null
 
 componentDidMount(){
-  this.unsubscribeFromAuth = auth.onAuthStateChanged(user => {
-    this.setState({ currentUser: user});
+  this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
+    if(userAuth){
+      const userRef = await createUserProfileDocument(userAuth);
+
+      userRef.onSnapshot(snapShot =>{
+        this.setState(
+        {
+          currentUser:{
+            id: snapShot.id,
+              ...snapShot.data()
+          }
+        });
+      });
+    }
+    else
+    {
+      this.setState({currentUser: userAuth});
+    }
   })
 }
 //closes auth subscription
@@ -39,12 +55,12 @@ componentWillUnmount(){
     return (
       <div>
         <Header currentUser={ this.state.currentUser} />
-        <switch>
+        <Switch>
         <Route exact path='/' component={Homepage} />
         <Route path='/shop' component={ShopPage} />
         <Route path='/shop/hats' component={HatsPage} />
         <Route path='/signin' component={SignInndSignUpPage} />
-        </switch>
+        </Switch>
       </div>
     );
   }
