@@ -26,11 +26,13 @@ $main-color: black;
 
     &:focus {
       outline: none;
+      &:valid{padding-left: 10px;}
     }
 
     &:focus ~ .form-input-label {
       @include shrinkLabel();
     }
+    &:valid{padding-left: 80px;}
   }
 
   input[type='password'] {
